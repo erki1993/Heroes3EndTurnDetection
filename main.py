@@ -2,9 +2,12 @@ import cv2
 from PIL import ImageGrab, Image
 import time
 import pytesseract
+from discord import SyncWebhook
 
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 END_TURN_SAMPLE_IMAGE = "EndTurnSample.png"
+
+discord_webhook = "https://discordapp.com/api/webhooks/1264676751812853791/mxTmzXmbZuRvu_hCYz3cQeyC9hRHC40RDA0PFIN-oqTx1yAVliTGTBJP6AnHRScAUR4M"
 
 
 def get_image_similiarity(sample_picture_file, new_picture_file):
@@ -50,7 +53,9 @@ if __name__ == '__main__':
                 print(f"{player_name} turn")
                 if last_sent_user != player_name:
                     last_sent_user = player_name
-                    # send_message_to_discord(player_name)
+
+                    webhook = SyncWebhook.from_url(discord_webhook)
+                    webhook.send("It's " + player_name + "'s turn!")
         else:
             detected = False
         time.sleep(1)
