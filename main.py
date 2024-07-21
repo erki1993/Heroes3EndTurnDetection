@@ -25,12 +25,19 @@ def get_image_similiarity(sample_picture_file, new_picture_file):
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
+    detected = False
+    last_sent_user = None
     while True:
         im = ImageGrab.grab()
         im.save("Screenshot.png")
         similiarity = get_image_similiarity(END_TURN_SAMPLE_IMAGE, "Screenshot.png")
-        if similiarity == 1.0:
+        if similiarity == 1.0 and detected is False:
+            detected = True
             print("END TURN detected")
+            im = Image.open("Screenshot.png")
+            width, height = im.size
+            im = im.crop((width / 3, height / 3, 2 * width / 3, 2 * height / 3))
+            im.save("Screenshot.png")
             image = cv2.imread("Screenshot.png")
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             gray = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)[1]
@@ -38,6 +45,12 @@ if __name__ == '__main__':
             cv2.imwrite(filename, gray)
 
             text = pytesseract.image_to_string(Image.open("Screenshot.png"), lang='eng')
-            print("Read out text", text)
-            break
+            if "turn" in text:
+                player_name = text.split("'s turn")[0]
+                print(f"{player_name} turn")
+                if last_sent_user != player_name:
+                    last_sent_user = player_name
+                    # send_message_to_discord(player_name)
+        else:
+            detected = False
         time.sleep(1)
