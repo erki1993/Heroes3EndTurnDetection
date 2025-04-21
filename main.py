@@ -50,9 +50,9 @@ if __name__ == '__main__':
             im = Image.open(SCREENSHOT_FILE)
             width, height = im.size
        
-            left = width / 3 + 140
+            left = width / 3 + 80
+            right = (2 * width / 3) - 82
             top = height / 3 + 30
-            right = (2 * width / 3) - 140
             bottom = (2 * height / 3) - 250
             im = im.crop((left, top, right, bottom))
             im.save(SCREESHOT_CROPPED_FILE)
