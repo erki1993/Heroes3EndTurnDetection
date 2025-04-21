@@ -30,6 +30,31 @@ def get_image_similiarity(sample_picture_file, new_picture_file):
     return metric_val
 
 
+def crop_image_for_tesseract(image_file):
+    im = Image.open(image_file)
+    width, height = im.size
+
+    left = width / 3 + 80
+    right = (2 * width / 3) - 82
+    top = height / 3 + 30
+    bottom = (2 * height / 3) - 250
+    im = im.crop((left, top, right, bottom))
+    im.save(SCREESHOT_CROPPED_FILE)
+    return SCREESHOT_CROPPED_FILE
+
+
+def clean_ocr_text(text: str) -> str:
+    lines = text.strip().splitlines()
+    cleaned_lines = [line.strip(" |") for line in lines if line.strip(" |")]
+    return " ".join(cleaned_lines)
+
+
+def read_text_from_image(image_file):
+    text = pytesseract.image_to_string(Image.open(image_file), lang='eng', config='--psm 11')
+    text = clean_ocr_text(text)
+    return text
+
+
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     detected = False
@@ -47,22 +72,13 @@ if __name__ == '__main__':
         if similiarity >= MIN_SIMILIAIRTY and detected is False:
             detected = True
             logging.info("END TURN detected")
-            im = Image.open(SCREENSHOT_FILE)
-            width, height = im.size
-       
-            left = width / 3 + 80
-            right = (2 * width / 3) - 82
-            top = height / 3 + 30
-            bottom = (2 * height / 3) - 250
-            im = im.crop((left, top, right, bottom))
-            im.save(SCREESHOT_CROPPED_FILE)
-
-            text = pytesseract.image_to_string(Image.open(SCREESHOT_CROPPED_FILE), lang='eng')
-            logging.info(f"Read out text from image: {text}")
+            cropped_img = crop_image_for_tesseract(SCREENSHOT_FILE)
+            text = read_text_from_image(cropped_img)
 
             if last_detected_text == text:
-                logging.info(f"Text not changed: {text}")
+                logging.debug(f"Text not changed: {text}")
             else:
+                logging.info(f"Read out new text from image: {text}")
                 last_detected_text = text
                 if "attack" in text:
                     # in case someone is attacked outside of normal turn order
