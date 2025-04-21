@@ -61,7 +61,7 @@ if __name__ == '__main__':
             logging.info(f"Read out text from image: {text}")
 
             if last_detected_text == text:
-                logging.info("Text not changed")
+                logging.info(f"Text not changed: {text}")
             else:
                 last_detected_text = text
                 if "attack" in text:
